@@ -1,0 +1,12 @@
+{
+  "calculator_name": "Ideal Body Weight",
+  "task_type": "TODO: equation-based | rule-based | scoring",
+  "formula_or_rule": "TODO",
+  "required_entities": [],
+  "unit_rules": {},
+  "condition_rules": {},
+  "output_format": {
+    "value": "number",
+    "unit": "TODO"
+  }
+}

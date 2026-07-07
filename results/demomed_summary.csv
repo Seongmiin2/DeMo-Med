@@ -1,0 +1,5 @@
+method,N,answer_accuracy,no_numeric_output_rate,abstain_rate
+llm_only,20,0.5,0.15,0.0
+cot,20,0.6,0.15,0.0
+open_book,20,0.55,0.25,0.0
+demo_med,20,0.75,0.25,0.25

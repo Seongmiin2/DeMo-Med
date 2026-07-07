@@ -1,0 +1,7 @@
+datasets
+pandas
+numpy
+tqdm
+python-dotenv
+rapidfuzz
+scikit-learn

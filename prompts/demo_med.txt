@@ -1,0 +1,43 @@
+You are solving a medical calculation benchmark problem using DeMo-Med.
+
+M1. Clinical Rule Injection:
+Use this calculator knowledge card:
+{knowledge_card}
+
+M2. Patient Value Extraction & Planning:
+Extract only the required patient values from the note.
+If a required value is missing, mark it as missing.
+
+M3. Clinical Verification:
+Check:
+- missing values
+- unit compatibility
+- sex/age correction
+- inclusion or exclusion condition
+- arithmetic consistency
+
+M4. Precision Answering:
+Return the final answer only if verification passes.
+
+Patient note:
+{patient_note}
+
+Question:
+{question}
+
+Return only JSON:
+{
+  "calculator": "...",
+  "extracted_entities": {},
+  "solution_plan": [],
+  "verification": {
+    "missing_values": [],
+    "unit_errors": [],
+    "condition_errors": [],
+    "arithmetic_check": "pass/fail"
+  },
+  "answer": "...",
+  "unit": "...",
+  "abstain": false,
+  "abstain_reason": ""
+}

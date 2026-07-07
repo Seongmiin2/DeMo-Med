@@ -1,0 +1,33 @@
+method,id,calculator_name,predicted_answer,ground_truth_answer,lower_limit,upper_limit,abstain,abstain_reason
+llm_only,101,Calcium Correction for Hypoalbuminemia,6.52,9.32,8.854,9.786,False,
+llm_only,861,Albumin Corrected Delta Ratio,0.35,0.7,0.665,0.735,False,
+llm_only,981,Estimated Due Date,Not applicable,09/11/2014,09/11/2014,09/11/2014,False,
+llm_only,61,Mean Arterial Pressure (MAP),200.00,100.0,95.0,105.0,False,
+llm_only,261,HEART Score for Major Cardiac Events,Not applicable,4,4,4,False,
+llm_only,681,QTc Framingham Calculator,280.00,560.0007,532.00067,588.00074,False,
+llm_only,241,Revised Cardiac Risk Index for Pre-Operative Risk,2.60,2,2,2,False,
+llm_only,541,CURB-65 Score for Pneumonia Severity,See explanation,1,1,1,False,
+llm_only,661,QTc Fridericia Calculator,241.03,482.05069,457.94816,506.15322,False,
+llm_only,821,Albumin Corrected Anion Gap,13.47,19.25,18.2875,20.2125,False,
+cot,341,MELD Na (UNOS/OPTN),Unable to determine from the note,18.0,17.1,18.9,False,
+cot,101,Calcium Correction for Hypoalbuminemia,16.78,9.32,8.854,9.786,False,
+cot,261,HEART Score for Major Cardiac Events,See explanation,4,4,4,False,
+cot,121,Wells' Criteria for Pulmonary Embolism,1.05,1.5,1.5,1.5,False,
+cot,641,SIRS Criteria,1.80,1,1,1,False,
+cot,541,CURB-65 Score for Pneumonia Severity,1.30,1,1,1,False,
+cot,381,Sodium Correction for Hyperglycemia,54.33,108.656,103.2232,114.0888,False,
+cot,521,Anion Gap,See explanation,15.0,14.25,15.75,False,
+open_book,621,PERC Rule for Pulmonary Embolism,2.00,4,4,4,False,
+open_book,81,Body Mass Index (BMI),Unable to determine from the note,27.68878,26.30434,29.07322,False,
+open_book,61,Mean Arterial Pressure (MAP),200.00,100.0,95.0,105.0,False,
+open_book,941,Sequential Organ Failure Assessment (SOFA) Score,4.20,6,6,6,False,
+open_book,681,QTc Framingham Calculator,See explanation,560.0007,532.00067,588.00074,False,
+open_book,641,SIRS Criteria,1.80,1,1,1,False,
+open_book,541,CURB-65 Score for Pneumonia Severity,See explanation,1,1,1,False,
+open_book,1041,Morphine Milligram Equivalents (MME) Calculator,Not applicable,149.0,141.55,156.45,False,
+open_book,161,Ideal Body Weight,Not applicable,55.07095,52.3174,57.8245,False,
+demo_med,81,Body Mass Index (BMI),,27.68878,26.30434,29.07322,True,missing required patient value
+demo_med,101,Calcium Correction for Hypoalbuminemia,,9.32,8.854,9.786,True,missing required patient value
+demo_med,641,SIRS Criteria,,1,1,1,True,unit mismatch between note and formula
+demo_med,381,Sodium Correction for Hyperglycemia,,108.656,103.2232,114.0888,True,missing required patient value
+demo_med,661,QTc Fridericia Calculator,,482.05069,457.94816,506.15322,True,unit mismatch between note and formula

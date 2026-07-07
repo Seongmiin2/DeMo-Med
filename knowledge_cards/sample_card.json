@@ -1,0 +1,17 @@
+{
+  "calculator_name": "Cockcroft-Gault Creatinine Clearance",
+  "task_type": "equation-based",
+  "formula_or_rule": "CrCl = ((140 - age) * weight * gender_coefficient) / (72 * serum_creatinine)",
+  "required_entities": ["age", "sex", "weight_kg", "serum_creatinine_mg_dl"],
+  "unit_rules": {
+    "weight": "kg",
+    "serum_creatinine": "mg/dL"
+  },
+  "condition_rules": {
+    "gender_coefficient": "1.0 for male, 0.85 for female"
+  },
+  "output_format": {
+    "value": "number",
+    "unit": "mL/min"
+  }
+}

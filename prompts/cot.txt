@@ -1,0 +1,24 @@
+You are solving a medical calculation benchmark problem.
+
+Patient note:
+{patient_note}
+
+Question:
+{question}
+
+Think step by step:
+1. Identify the requested calculator.
+2. Extract required patient values.
+3. Select the formula or scoring rule.
+4. Substitute values.
+5. Compute the final answer.
+
+Return only JSON:
+{
+  "calculator": "...",
+  "entities": {},
+  "formula_or_rule": "...",
+  "calculation": "...",
+  "answer": "...",
+  "unit": "..."
+}

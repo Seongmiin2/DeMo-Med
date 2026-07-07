@@ -1,0 +1,20 @@
+You are solving a medical calculation benchmark problem.
+
+Calculator specification:
+{knowledge_card}
+
+Patient note:
+{patient_note}
+
+Question:
+{question}
+
+Use the provided calculator specification.
+Return only JSON:
+{
+  "calculator": "...",
+  "entities": {},
+  "formula_or_rule": "...",
+  "answer": "...",
+  "unit": "..."
+}

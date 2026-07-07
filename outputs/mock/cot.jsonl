@@ -1,0 +1,20 @@
+{"id": 621, "calculator": "PERC Rule for Pulmonary Embolism", "answer": "4", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 81, "calculator": "Body Mass Index (BMI)", "answer": "27.68878", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 341, "calculator": "MELD Na (UNOS/OPTN)", "answer": "Unable to determine from the note", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 101, "calculator": "Calcium Correction for Hypoalbuminemia", "answer": "16.78", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 861, "calculator": "Albumin Corrected Delta Ratio", "answer": "0.7", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 981, "calculator": "Estimated Due Date", "answer": "09/11/2014", "unit": "date", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 61, "calculator": "Mean Arterial Pressure (MAP)", "answer": "100.0", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 261, "calculator": "HEART Score for Major Cardiac Events", "answer": "See explanation", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 941, "calculator": "Sequential Organ Failure Assessment (SOFA) Score", "answer": "6", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 121, "calculator": "Wells' Criteria for Pulmonary Embolism", "answer": "1.05", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 681, "calculator": "QTc Framingham Calculator", "answer": "560.0007", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 641, "calculator": "SIRS Criteria", "answer": "1.80", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 241, "calculator": "Revised Cardiac Risk Index for Pre-Operative Risk", "answer": "2", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 541, "calculator": "CURB-65 Score for Pneumonia Severity", "answer": "1.30", "unit": "integer", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 381, "calculator": "Sodium Correction for Hyperglycemia", "answer": "54.33", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 661, "calculator": "QTc Fridericia Calculator", "answer": "482.05069", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 521, "calculator": "Anion Gap", "answer": "See explanation", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 1041, "calculator": "Morphine Milligram Equivalents (MME) Calculator", "answer": "149.0", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 161, "calculator": "Ideal Body Weight", "answer": "55.07095", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}
+{"id": 821, "calculator": "Albumin Corrected Anion Gap", "answer": "19.25", "unit": "decimal", "entities": {}, "formula_or_rule": "mock formula", "calculation": "mock calculation"}

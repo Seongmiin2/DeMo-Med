@@ -1,0 +1,14 @@
+You are solving a medical calculation benchmark problem.
+
+Patient note:
+{patient_note}
+
+Question:
+{question}
+
+Return only JSON:
+{
+  "answer": "...",
+  "unit": "...",
+  "reason": "brief explanation"
+}

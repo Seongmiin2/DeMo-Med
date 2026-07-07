@@ -1,0 +1,12 @@
+{
+  "calculator_name": "Revised Cardiac Risk Index for Pre-Operative Risk",
+  "task_type": "TODO: equation-based | rule-based | scoring",
+  "formula_or_rule": "TODO",
+  "required_entities": [],
+  "unit_rules": {},
+  "condition_rules": {},
+  "output_format": {
+    "value": "number",
+    "unit": "TODO"
+  }
+}
