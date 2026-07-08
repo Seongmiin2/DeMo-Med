@@ -1,12 +1,13 @@
 {
   "calculator_name": "PERC Rule for Pulmonary Embolism",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "rule-based",
+  "formula_or_rule": "Count how many of the 8 PERC criteria are met (each met criterion = 1 point): age >= 50; HR >= 100 bpm; SpO2 on room air < 95%; unilateral leg swelling; hemoptysis; recent surgery or trauma (within 4 weeks requiring general anesthesia); prior PE or DVT; hormone use (oral contraceptives, HRT, or estrogenic hormone use in males or females). Score = number of criteria met (0-8). PERC-negative (rules out PE) only if score = 0.",
+  "required_entities": ["age", "heart_rate", "spo2_percent", "unilateral_leg_swelling", "hemoptysis", "recent_surgery_or_trauma", "prior_pe_or_dvt", "hormone_use"],
+  "unit_rules": {"heart_rate": "bpm", "spo2_percent": "%"},
+  "condition_rules": {
+    "age": ">= 50 counts as 1 point",
+    "heart_rate": ">= 100 counts as 1 point",
+    "spo2_percent": "< 95 counts as 1 point"
+  },
+  "output_format": {"value": "integer count 0-8", "unit": "criteria met"}
 }

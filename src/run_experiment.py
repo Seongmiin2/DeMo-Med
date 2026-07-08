@@ -12,10 +12,12 @@ Usage:
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 import pandas as pd
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 sys.path.append(str(Path(__file__).resolve().parent))
 from common.console import configure_utf8_stdout  # noqa: E402
@@ -28,6 +30,11 @@ REAL_DIR = PROJECT_ROOT / "outputs" / "real"
 
 METHODS = ["llm_only", "cot", "open_book", "demo_med"]
 NEEDS_KNOWLEDGE_CARD = {"open_book", "demo_med"}
+DEFAULT_MODEL = "gpt-4o"
+SYSTEM_PROMPT = (
+    "You are a careful clinical calculation assistant. Follow the instructions "
+    "exactly and respond with a single JSON object only, no prose outside the JSON."
+)
 
 
 def load_prompt_template(method: str) -> str:
@@ -58,17 +65,40 @@ def build_prompt(method: str, row: pd.Series) -> str:
     return prompt
 
 
-def call_llm(prompt: str) -> str:
-    """Send `prompt` to a real LLM and return its raw text response.
+_client = None
 
-    TODO before using --live:
-      1. pip install anthropic  (or openai)
-      2. Put ANTHROPIC_API_KEY (or OPENAI_API_KEY) in .env
-      3. Implement the actual API call below.
-    """
-    raise NotImplementedError(
-        "call_llm() is a placeholder. Implement a real API call before using --live."
-    )
+
+def get_client():
+    """Lazily create the OpenAI client so --dry-run never needs an API key installed/set."""
+    global _client
+    if _client is None:
+        from openai import OpenAI
+
+        _client = OpenAI()  # reads OPENAI_API_KEY from the environment (set via .env)
+    return _client
+
+
+def call_llm(prompt: str, model: str, max_retries: int = 3) -> str:
+    """Send `prompt` to the OpenAI chat completions API and return its raw text response."""
+    client = get_client()
+    last_error = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                temperature=0,
+                response_format={"type": "json_object"},
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            return response.choices[0].message.content
+        except Exception as exc:  # noqa: BLE001 - retry on any transient API error
+            last_error = exc
+            if attempt < max_retries:
+                time.sleep(2 * attempt)
+    raise RuntimeError(f"call_llm failed after {max_retries} attempts") from last_error
 
 
 def parse_json_response(raw_text: str) -> dict:
@@ -87,6 +117,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", type=Path, default=PROJECT_ROOT / "data" / "pilot" / "pilot_20.csv")
     parser.add_argument("--method", choices=METHODS, default=None, help="run a single method only")
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="OpenAI model name")
     parser.add_argument("--live", action="store_true", help="actually call the LLM API")
     parser.add_argument("--dry-run", dest="live", action="store_false")
     parser.set_defaults(live=False)
@@ -103,7 +134,9 @@ def main() -> None:
 
     for method in methods:
         records = []
-        for _, row in df.iterrows():
+        rows = list(df.iterrows())
+        iterator = tqdm(rows, desc=method) if args.live else rows
+        for _, row in iterator:
             prompt = build_prompt(method, row)
 
             if not args.live:
@@ -111,9 +144,14 @@ def main() -> None:
                 print(prompt)
                 continue
 
-            raw_text = call_llm(prompt)
-            parsed = parse_json_response(raw_text)
-            parsed["id"] = int(row["id"])
+            row_id = int(row["id"])
+            try:
+                raw_text = call_llm(prompt, model=args.model)
+                parsed = parse_json_response(raw_text)
+                parsed["id"] = row_id
+            except Exception as exc:  # noqa: BLE001 - one bad row shouldn't kill the whole run
+                print(f"  [{method}] id={row_id} FAILED: {exc}")
+                parsed = {"id": row_id, "answer": "", "unit": "", "error": str(exc)}
             records.append(parsed)
 
         if args.live:

@@ -1,12 +1,13 @@
 {
   "calculator_name": "CURB-65 Score for Pneumonia Severity",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "scoring",
+  "formula_or_rule": "Sum 1 point for each present (total 0-5): Confusion (new disorientation to person/place/time); Urea > 7 mmol/L (BUN > 19 mg/dL / > 20 mg/dL depending on source - use BUN > 19 mg/dL if urea not given directly); Respiratory rate >= 30/min; Blood pressure (systolic < 90 mmHg or diastolic <= 60 mmHg); age >= 65 years.",
+  "required_entities": ["confusion_present", "bun_mg_dl", "respiratory_rate", "systolic_bp_mmhg", "diastolic_bp_mmhg", "age"],
+  "unit_rules": {"bun": "mg/dL", "respiratory_rate": "breaths/min", "blood_pressure": "mmHg"},
+  "condition_rules": {
+    "urea_bun": "urea > 7 mmol/L is approximately BUN > 19 mg/dL",
+    "blood_pressure": "systolic < 90 OR diastolic <= 60 counts as 1 point",
+    "age": ">= 65 counts as 1 point"
+  },
+  "output_format": {"value": "integer, 0-5", "unit": "score"}
 }

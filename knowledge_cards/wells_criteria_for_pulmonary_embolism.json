@@ -1,12 +1,11 @@
 {
   "calculator_name": "Wells' Criteria for Pulmonary Embolism",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "scoring",
+  "formula_or_rule": "Sum weighted points: clinical signs/symptoms of DVT = 3; PE is the #1 diagnosis or equally likely = 3; heart rate > 100 bpm = 1.5; immobilization (>=3 days) or surgery in the previous 4 weeks = 1.5; previous, objectively diagnosed PE or DVT = 1.5; hemoptysis = 1; malignancy (treatment within 6 months or palliative) = 1. Total score, typically 0-12.5. Risk stratification (3-tier): <=1 low risk, 2-6 moderate risk, >6 high risk. (2-tier): <=4 PE unlikely, >4 PE likely.",
+  "required_entities": ["dvt_signs_symptoms", "pe_most_likely_diagnosis", "heart_rate", "immobilization_or_recent_surgery", "prior_pe_or_dvt", "hemoptysis", "malignancy"],
+  "unit_rules": {"heart_rate": "bpm"},
+  "condition_rules": {
+    "heart_rate": "> 100 bpm scores 1.5 points"
+  },
+  "output_format": {"value": "number (0-12.5)", "unit": "score"}
 }

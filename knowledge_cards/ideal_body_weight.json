@@ -1,12 +1,11 @@
 {
   "calculator_name": "Ideal Body Weight",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "equation-based",
+  "formula_or_rule": "Devine formula. Men: IBW (kg) = 50 + 2.3 * (height_in_inches - 60). Women: IBW (kg) = 45.5 + 2.3 * (height_in_inches - 60). Only apply for height >= 60 inches (5 ft); the formula is not defined below that.",
+  "required_entities": ["sex", "height_inches"],
+  "unit_rules": {"height": "inches (convert from cm by dividing by 2.54)"},
+  "condition_rules": {
+    "gender_coefficient": "50 for male, 45.5 for female"
+  },
+  "output_format": {"value": "number", "unit": "kg"}
 }

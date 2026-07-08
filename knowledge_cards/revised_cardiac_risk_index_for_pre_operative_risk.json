@@ -1,12 +1,11 @@
 {
   "calculator_name": "Revised Cardiac Risk Index for Pre-Operative Risk",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "scoring",
+  "formula_or_rule": "Sum 1 point for each of 6 criteria present (total 0-6): high-risk surgery (intraperitoneal, intrathoracic, or suprainguinal vascular); history of ischemic heart disease; history of congestive heart failure; history of cerebrovascular disease (stroke or TIA); insulin-dependent diabetes mellitus; preoperative serum creatinine > 2.0 mg/dL.",
+  "required_entities": ["high_risk_surgery", "ischemic_heart_disease", "chf_history", "cerebrovascular_disease_history", "insulin_dependent_diabetes", "creatinine_mg_dl"],
+  "unit_rules": {"creatinine": "mg/dL"},
+  "condition_rules": {
+    "creatinine": "> 2.0 mg/dL counts as 1 point"
+  },
+  "output_format": {"value": "integer, 0-6", "unit": "score"}
 }

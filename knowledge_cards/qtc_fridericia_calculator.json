@@ -1,12 +1,9 @@
 {
   "calculator_name": "QTc Fridericia Calculator",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
+  "task_type": "equation-based",
+  "formula_or_rule": "RR interval (seconds) = 60 / heart_rate_bpm. QTc (ms) = QT_interval_ms / (RR_seconds)^(1/3). Keep QT in ms throughout - do NOT convert QT to seconds; only RR is in seconds.",
+  "required_entities": ["qt_interval_ms", "heart_rate_bpm"],
+  "unit_rules": {"qt_interval": "ms", "heart_rate": "bpm", "rr_interval": "seconds (only the RR term, not QT)"},
   "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "output_format": {"value": "number", "unit": "ms"}
 }

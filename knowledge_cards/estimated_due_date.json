@@ -1,12 +1,11 @@
 {
   "calculator_name": "Estimated Due Date",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
+  "task_type": "rule-based",
+  "formula_or_rule": "Naegele's rule: EDD = first day of the last menstrual period (LMP) + 280 days (40 weeks). Equivalently: LMP + 1 year - 3 months + 7 days.",
+  "required_entities": ["last_menstrual_period_date"],
   "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "condition_rules": {
+    "note": "if a first-trimester ultrasound gestational age is given instead of LMP, back-calculate an effective LMP from the ultrasound date and gestational age, then apply the same +280 days"
+  },
+  "output_format": {"value": "date", "unit": "date (e.g. YYYY-MM-DD)"}
 }

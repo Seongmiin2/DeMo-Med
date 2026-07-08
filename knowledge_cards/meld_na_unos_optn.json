@@ -1,12 +1,15 @@
 {
   "calculator_name": "MELD Na (UNOS/OPTN)",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "equation-based",
+  "formula_or_rule": "Step 1 - MELD = 3.78*ln(bilirubin_mg_dl) + 11.2*ln(INR) + 9.57*ln(creatinine_mg_dl) + 6.43. Bilirubin, INR, and creatinine are each floored at 1.0 if below 1.0; creatinine is capped at 4.0 (and set to 4.0 if the patient has had dialysis >= twice in the past week). Step 2 - if MELD > 11: MELD_Na = MELD + 1.32*(137 - Na) - (0.033*MELD*(137 - Na)); otherwise MELD_Na = MELD. Na is bounded to [125, 137] mEq/L before use. Final MELD_Na is bounded to [6, 40] and rounded to the nearest integer.",
+  "required_entities": ["bilirubin_mg_dl", "inr", "creatinine_mg_dl", "sodium_meq_l", "on_dialysis_twice_past_week"],
+  "unit_rules": {"bilirubin": "mg/dL", "creatinine": "mg/dL", "sodium": "mEq/L"},
+  "condition_rules": {
+    "bilirubin_floor": "minimum 1.0",
+    "inr_floor": "minimum 1.0",
+    "creatinine_floor_and_cap": "minimum 1.0, maximum 4.0 (set to 4.0 if on dialysis >=2x in past week)",
+    "sodium_bounds": "clamp to [125, 137] before applying MELD-Na adjustment",
+    "final_score_bounds": "clamp final score to [6, 40]"
+  },
+  "output_format": {"value": "integer, 6-40", "unit": "score"}
 }

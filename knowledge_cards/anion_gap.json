@@ -1,12 +1,9 @@
 {
   "calculator_name": "Anion Gap",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
+  "task_type": "equation-based",
+  "formula_or_rule": "Anion Gap (mEq/L) = Na - (Cl + HCO3)  [sodium minus the sum of chloride and bicarbonate; potassium is not included in this standard version]",
+  "required_entities": ["sodium_meq_l", "chloride_meq_l", "bicarbonate_meq_l"],
+  "unit_rules": {"sodium": "mEq/L", "chloride": "mEq/L", "bicarbonate": "mEq/L"},
   "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "output_format": {"value": "number", "unit": "mEq/L"}
 }

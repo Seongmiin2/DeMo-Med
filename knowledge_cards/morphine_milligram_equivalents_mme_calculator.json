@@ -1,12 +1,12 @@
 {
   "calculator_name": "Morphine Milligram Equivalents (MME) Calculator",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "rule-based",
+  "formula_or_rule": "For each opioid the patient takes, MME_contribution = daily_dose_mg (or mcg/hr for transdermal fentanyl) * conversion_factor. Total MME/day = sum of all contributions. CDC oral conversion factors: codeine=0.15; fentanyl transdermal (mcg/hr)=2.4; hydrocodone=1; hydromorphone=4; methadone=3 (1-20mg/day), 4 (21-40mg/day), 8 (41-60mg/day), 10 (>60mg/day) [dose-dependent, apply the factor matching the patient's total daily methadone dose]; morphine=1; oxycodone=1.5; oxymorphone=3; tapentadol=0.4; tramadol=0.1.",
+  "required_entities": ["opioid_name", "opioid_daily_dose"],
+  "unit_rules": {"most_opioids": "mg/day", "fentanyl_transdermal": "mcg/hr"},
+  "condition_rules": {
+    "methadone": "conversion factor depends on the total daily methadone dose (see tiers above)",
+    "multiple_opioids": "if the patient is on more than one opioid, sum the MME contribution of each"
+  },
+  "output_format": {"value": "number", "unit": "MME/day"}
 }

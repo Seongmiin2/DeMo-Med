@@ -1,12 +1,12 @@
 {
   "calculator_name": "Albumin Corrected Delta Ratio",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "equation-based",
+  "formula_or_rule": "Step 1 - Anion Gap = Na - (Cl + HCO3). Step 2 - Albumin Corrected Anion Gap = Anion Gap + 2.5 * (4.0 - albumin_g_dl). Step 3 - Albumin Corrected Delta Ratio = (Albumin Corrected Anion Gap - 12) / (24 - HCO3)",
+  "required_entities": ["sodium_meq_l", "chloride_meq_l", "bicarbonate_meq_l", "albumin_g_dl"],
+  "unit_rules": {"sodium": "mEq/L", "chloride": "mEq/L", "bicarbonate": "mEq/L", "albumin": "g/dL"},
+  "condition_rules": {
+    "normal_anion_gap_reference": "12 mEq/L",
+    "normal_bicarbonate_reference": "24 mEq/L"
+  },
+  "output_format": {"value": "number (unitless ratio)", "unit": ""}
 }

@@ -1,12 +1,12 @@
 {
   "calculator_name": "Body Mass Index (BMI)",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
+  "task_type": "equation-based",
+  "formula_or_rule": "BMI = weight_kg / (height_m)^2",
+  "required_entities": ["weight_kg", "height_m"],
+  "unit_rules": {
+    "weight": "kg",
+    "height": "m (cm / 100, or inches * 0.0254)"
+  },
   "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "output_format": {"value": "number", "unit": "kg/m^2"}
 }

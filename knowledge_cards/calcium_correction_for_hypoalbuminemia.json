@@ -1,12 +1,9 @@
 {
   "calculator_name": "Calcium Correction for Hypoalbuminemia",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
+  "task_type": "equation-based",
+  "formula_or_rule": "Corrected calcium (mg/dL) = measured total calcium (mg/dL) + 0.8 * (4.0 - patient's albumin (g/dL))",
+  "required_entities": ["total_calcium_mg_dl", "albumin_g_dl"],
+  "unit_rules": {"calcium": "mg/dL", "albumin": "g/dL"},
   "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "output_format": {"value": "number", "unit": "mg/dL"}
 }

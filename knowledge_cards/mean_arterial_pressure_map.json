@@ -1,12 +1,9 @@
 {
   "calculator_name": "Mean Arterial Pressure (MAP)",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
+  "task_type": "equation-based",
+  "formula_or_rule": "MAP = DBP + (1/3) * (SBP - DBP), equivalently MAP = (SBP + 2*DBP) / 3",
+  "required_entities": ["systolic_bp_mmhg", "diastolic_bp_mmhg"],
+  "unit_rules": {"blood_pressure": "mmHg"},
   "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "output_format": {"value": "number", "unit": "mmHg"}
 }

@@ -1,12 +1,11 @@
 {
   "calculator_name": "Sodium Correction for Hyperglycemia",
-  "task_type": "TODO: equation-based | rule-based | scoring",
-  "formula_or_rule": "TODO",
-  "required_entities": [],
-  "unit_rules": {},
-  "condition_rules": {},
-  "output_format": {
-    "value": "number",
-    "unit": "TODO"
-  }
+  "task_type": "equation-based",
+  "formula_or_rule": "Corrected sodium (mEq/L) = measured sodium (mEq/L) + 2.4 * ((serum glucose mg/dL - 100) / 100). This is the Hillier correction factor (2.4 mEq/L Na rise per 100 mg/dL glucose above normal). An older, less aggressive correction (Katz) uses a factor of 1.6 instead of 2.4 - if the expected answer doesn't match with 2.4, try 1.6.",
+  "required_entities": ["sodium_meq_l", "glucose_mg_dl"],
+  "unit_rules": {"sodium": "mEq/L", "glucose": "mg/dL"},
+  "condition_rules": {
+    "no_correction_needed": "only apply the correction if glucose > 100 mg/dL"
+  },
+  "output_format": {"value": "number", "unit": "mEq/L"}
 }

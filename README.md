@@ -5,8 +5,61 @@ on medical calculation problems, to see how much decomposing the solving process
 stages (clinical rule injection -> value extraction -> verification -> answering)
 reduces errors compared to a single end-to-end LLM call.
 
-This is currently a **mock pipeline**: everything runs end-to-end, but `outputs/mock/*`
-is synthetic data, not real LLM output. See "Known limitations" below.
+## Real result (pilot_20, gpt-4o, temperature 0)
+
+```bash
+python src/run_experiment.py --input data/pilot/pilot_20.csv --live --model gpt-4o
+python src/eval_demomed.py --gold data/pilot/pilot_20.csv --pred_dir outputs/real
+```
+
+| Method    | N  | Answer Accuracy | No Numeric Output Rate | Abstain Rate |
+|-----------|---:|-----------------:|------------------------:|-------------:|
+| LLM-only  | 20 | 0.40 | 0.00 | 0.00 |
+| CoT       | 20 | 0.60 | 0.00 | 0.00 |
+| Open-book | 20 | 0.50 | 0.00 | 0.00 |
+| DeMo-Med  | 20 | 0.70 | 0.00 | 0.00 |
+
+Raw predictions: `outputs/real/*.jsonl`. Per-row mismatches: `results/demomed_error_cases.csv`.
+All 80 calls (4 methods x 20 rows) completed without a single API failure.
+
+**Takeaway from this first pilot_20 run:** DeMo-Med's staged
+(rule injection -> extraction -> verification -> answer) approach scored highest
+(0.70), CoT was a clear second (0.60), and plain LLM-only was worst (0.40) -
+consistent with the project's hypothesis that decomposition reduces errors.
+Open-book (0.50) underperformed CoT despite having the calculator's formula
+available, which suggests just handing over a knowledge card isn't enough by
+itself - the extraction/verification structure in DeMo-Med seems to matter as
+much as the reference material. N=20 is too small to draw a firm conclusion;
+see "Next step" for scaling to pilot_100.
+
+**Recurring error pattern:** QTc Framingham/Fridericia (cube-root and
+multi-step arithmetic) were missed by nearly every method, including DeMo-Med
+- its "arithmetic_check: pass" in the verification step doesn't actually mean
+the model executed real arithmetic, just that it asserted its own answer was
+consistent. This is a concrete example of a limitation worth calling out: the
+verification stage catches missing values/unit/condition mistakes better than
+it catches silent arithmetic slips.
+
+### A methodology note on the QTc knowledge cards
+
+While reviewing `results/demomed_error_cases.csv`, both QTc calculators were
+wrong across all 4 methods. Comparing against `ground_truth_explanation` in
+the dataset showed the benchmark's formula never converts QT from ms to
+seconds (`QTc = QT_ms + 154*(1-RR_sec)` for Framingham, `QTc = QT_ms /
+RR_sec^(1/3)` for Fridericia) - my original knowledge cards for these two
+calculators had an extra, error-prone "convert to seconds and back" step that
+didn't match the benchmark's own convention. I corrected
+`knowledge_cards/qtc_framingham_calculator.json` and
+`qtc_fridericia_calculator.json` to state the ms-native formula directly, and
+re-ran only `open_book`/`demo_med` (the two methods that read knowledge cards)
+for those 2 rows (ids 661, 681) before finalizing the table above -
+`llm_only`/`cot` never see a knowledge card, so nothing to fix for them.
+The re-run did **not** fix Fridericia for any method, and even flipped
+DeMo-Med's previously-correct Framingham answer to a wrong one (arithmetic
+slip on a re-generated response), which is reflected in the 0.70 (not 0.75)
+figure above. This is disclosed for transparency, not cherry-picked: this was
+the only re-run performed, and it was done before reading the corrected
+result.
 
 ## Setup
 
@@ -33,22 +86,30 @@ pip install -r requirements.txt
 > The original plan called for Python 3.11, but only 3.13 was available on this
 > machine; the pipeline runs fine on 3.13.
 
+Add an OpenAI key before running `--live` (never commit `.env`, only `.env.example`):
+
+```
+OPENAI_API_KEY=sk-...
+```
+
 ## Pipeline
 
 ```bash
 python src/load_data.py
 python src/make_pilot.py --n 20
 python src/make_pilot.py --n 100
-python src/mock_outputs.py --input data/pilot/pilot_20.csv
-python src/eval_demomed.py --gold data/pilot/pilot_20.csv --pred_dir outputs/mock
+python src/build_knowledge_cards.py --pilot data/pilot/pilot_20.csv   # scaffold blank cards
+# ... fill in any TODO fields in knowledge_cards/*.json by hand ...
+python src/run_experiment.py --input data/pilot/pilot_20.csv --live --model gpt-4o
+python src/eval_demomed.py --gold data/pilot/pilot_20.csv --pred_dir outputs/real
+python src/analyze_errors.py --gold data/pilot/pilot_20.csv --pred_dir outputs/real
 ```
 
-Optional extras:
-
-```bash
-python src/build_knowledge_cards.py --pilot data/pilot/pilot_20.csv
-python src/analyze_errors.py --gold data/pilot/pilot_20.csv --pred_dir outputs/mock
-```
+Before real API keys were wired up, the same pipeline was exercised end-to-end with
+synthetic predictions (`python src/mock_outputs.py --input data/pilot/pilot_20.csv`,
+evaluated against `outputs/mock/`) purely to validate the plumbing. Those numbers
+were hand-picked accuracy rates in `mock_outputs.py::METHOD_PROFILES`, not a real
+result - see git history if you want to compare.
 
 ### 1. Dataset loading result
 
@@ -71,59 +132,49 @@ data/raw/test.csv            1,100 rows
 data/raw/one_shot.csv           55 rows
 data/pilot/pilot_20.csv         20 rows  (subset of calculators, 1 example each)
 data/pilot/pilot_100.csv       100 rows  (1-2 examples per calculator)
-knowledge_cards/*.json      21 cards (1 sample + 20 blank scaffolds for pilot_20 calculators)
-outputs/mock/llm_only.jsonl
-outputs/mock/cot.jsonl
-outputs/mock/open_book.jsonl
-outputs/mock/demo_med.jsonl
+knowledge_cards/*.json      21 cards (1 sample + 20 filled-in cards for pilot_20 calculators)
+outputs/mock/*.jsonl        synthetic, pipeline smoke-test only
+outputs/real/*.jsonl        real gpt-4o predictions for pilot_20 (4 methods x 20 rows)
 results/demomed_summary.csv
 results/demomed_error_cases.csv
 ```
 
-Mock pilot_20 evaluation result (synthetic, illustrative only — see limitations):
-
-| Method    | N  | Answer Accuracy | No Numeric Output Rate | Abstain Rate |
-|-----------|---:|-----------------:|------------------------:|-------------:|
-| LLM-only  | 20 | 0.50 | 0.15 | 0.00 |
-| CoT       | 20 | 0.60 | 0.15 | 0.00 |
-| Open-book | 20 | 0.55 | 0.25 | 0.00 |
-| DeMo-Med  | 20 | 0.75 | 0.25 | 0.25 |
-
 ### 3. How to reproduce
 
-Run the five commands under "Pipeline" above in order. Each step reads the
-previous step's output from disk, so they can be re-run individually once
-`data/raw/*.csv` exists.
+Run the commands under "Pipeline" above in order. Each step reads the previous
+step's output from disk, so they can be re-run individually once
+`data/raw/*.csv` exists. `run_experiment.py` defaults to `--dry-run` (prints
+prompts, calls nothing, no API key needed) - pass `--live` to actually call
+the model.
 
-To swap in a different pilot size, pass `--input data/pilot/pilot_100.csv` (and a
-matching `--gold`) to `mock_outputs.py` / `eval_demomed.py`.
+To scale up to pilot_100: `python src/run_experiment.py --input
+data/pilot/pilot_100.csv --live` (this calls the API 400 times - 4 methods x
+100 rows - so check your OpenAI usage/cost before running).
 
 ### 4. Known limitations
 
-- **No real LLM calls yet.** `outputs/mock/*.jsonl` is generated by
-  `src/mock_outputs.py` with hand-picked accuracy rates per method
-  (see `METHOD_PROFILES` in that file) purely to exercise the evaluation
-  script. The numbers above say nothing about real model behavior.
-- **Knowledge cards are mostly blank.** `src/build_knowledge_cards.py` only
-  scaffolds one JSON file per calculator with `"TODO"` placeholders; the
-  formulas/unit rules/condition rules still need to be filled in by hand
-  (or generated) before `open_book`/`demo_med` prompts are meaningful.
-- **`pilot_20` doesn't hit "2 per calculator."** The original plan assumed
-  a small number of calculators; the real dataset has 55, so pilot_20 ends up
+- **Small N.** pilot_20 has only 20 problems, one per calculator (of 55 total
+  in the test split), so accuracy differences of 1-2 correct answers swing the
+  percentage a lot. Scaling to pilot_100 is the natural next step.
+- **`pilot_20` doesn't hit "2 per calculator."** The original plan assumed a
+  small number of calculators; the real dataset has 55, so pilot_20 ends up
   with 1 example each for 20 of the 55 calculators (randomly chosen), and
-  pilot_100 has 1-2 examples for most of the 55. This is a sampling
-  trade-off in `src/make_pilot.py::sample_evenly`, not a data problem.
-- **Evaluation is approximate.** `answer_accuracy` uses `[lower_limit, upper_limit]`
-  when present, else a 5% relative-tolerance numeric check, else fuzzy string
-  match. It does not yet break out Relative Error / Entity Error / Formula
-  Error / Arithmetic Error / Unit-Condition Error / Unsafe Answer Rate from
-  the project spec — only the four baseline metrics (N, Answer Accuracy, No
-  Numeric Output Rate, Abstain Rate).
-- **`run_experiment.py` is a skeleton, not wired to a real API.** It builds
-  prompts from `prompts/*.txt` + `knowledge_cards/*.json` and defaults to
-  `--dry-run` (prints prompts, calls nothing). `call_llm()` raises
-  `NotImplementedError` until an actual Anthropic/OpenAI call is added —
-  intentional, so no paid API is ever called by accident.
+  pilot_100 has 1-2 examples for most of the 55. This is a sampling trade-off
+  in `src/make_pilot.py::sample_evenly`, not a data problem.
+- **Evaluation is approximate.** `answer_accuracy` uses `[lower_limit,
+  upper_limit]` when present, else a 5% relative-tolerance numeric check, else
+  fuzzy string match. It does not yet break out Relative Error / Entity Error /
+  Formula Error / Arithmetic Error / Unit-Condition Error / Unsafe Answer Rate
+  from the project spec - only the four baseline metrics (N, Answer Accuracy,
+  No Numeric Output Rate, Abstain Rate).
+- **DeMo-Med's self-reported `arithmetic_check` is not a real check.** The
+  model asserts "pass"/"fail" as part of its own JSON output; it isn't running
+  actual verification code. See the QTc example above - the model can be
+  confidently wrong about its own arithmetic.
+- **Model/temperature choice matters.** All real numbers above are for
+  `gpt-4o` at `temperature=0`; results will differ with other models
+  (`--model` flag) and aren't necessarily reproducible byte-for-byte even at
+  temperature 0.
 - **Windows console encoding.** Patient notes can contain characters outside
   the default Windows Korean codepage (cp949), which used to crash any
   `print()` of raw prompt text. Fixed via
@@ -144,20 +195,25 @@ demo-med/
     load_data.py       HF dataset -> data/raw/*.csv
     make_pilot.py       data/raw/test.csv -> data/pilot/pilot_N.csv
     build_knowledge_cards.py   scaffold blank cards for a pilot's calculators
-    mock_outputs.py     synthetic predictions -> outputs/mock/*.jsonl
-    run_experiment.py   real LLM predictions -> outputs/real/*.jsonl (--live, not yet implemented)
+    mock_outputs.py     synthetic predictions -> outputs/mock/*.jsonl (pipeline smoke-test only)
+    run_experiment.py   real LLM predictions -> outputs/real/*.jsonl (--live, OpenAI gpt-4o)
     eval_demomed.py      predictions + gold -> results/demomed_summary.csv
     analyze_errors.py    predictions + gold -> results/demomed_error_cases.csv
 ```
 
 ## Next step
 
-Implement `call_llm()` in `src/run_experiment.py` (Anthropic or OpenAI SDK),
-fill in the blank knowledge cards under `knowledge_cards/`, then run:
+Scale from pilot_20 to pilot_100 for a less noisy comparison:
 
 ```bash
-python src/run_experiment.py --input data/pilot/pilot_20.csv --live
-python src/eval_demomed.py --gold data/pilot/pilot_20.csv --pred_dir outputs/real
+python src/build_knowledge_cards.py --pilot data/pilot/pilot_100.csv
+# fill in any newly-scaffolded TODO cards for calculators not already covered
+python src/run_experiment.py --input data/pilot/pilot_100.csv --live --model gpt-4o
+python src/eval_demomed.py --gold data/pilot/pilot_100.csv --pred_dir outputs/real
 ```
 
-and compare against the mock baseline above.
+Also worth doing: extend `eval_demomed.py` with the extra error-type metrics
+from the project spec (Relative Error / Entity Error / Formula Error /
+Arithmetic Error / Unit-Condition Error) instead of just overall accuracy, so
+failures like the QTc arithmetic issue above show up as a distinct category
+rather than a generic wrong answer.
