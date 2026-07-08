@@ -1,0 +1,16 @@
+{
+  "calculator_name": "Creatinine Clearance (Cockcroft-Gault Equation)",
+  "task_type": "equation-based",
+  "formula_or_rule": "CrCl = ((140 - age) * weight_kg * gender_coefficient) / (72 * serum_creatinine_mg_dl)",
+  "required_entities": ["age", "sex", "weight_kg", "serum_creatinine_mg_dl", "height_cm"],
+  "unit_rules": {
+    "weight": "kg",
+    "serum_creatinine": "mg/dL",
+    "height": "cm"
+  },
+  "condition_rules": {
+    "gender_coefficient": "1.0 for male, 0.85 for female",
+    "weight_to_use": "MedCalc-Bench's question text for this calculator specifies an adjusted body weight rule (based on BMI vs ideal body weight) - follow whatever weight-selection instructions are given in the question itself, not just the patient's raw actual weight."
+  },
+  "output_format": {"value": "number", "unit": "mL/min"}
+}

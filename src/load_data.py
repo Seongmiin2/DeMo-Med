@@ -44,17 +44,30 @@ Datasets tried:
 """ + "\n".join(f"  - {name}" for name in DATASET_CANDIDATES)
 
 
+def get_dataset_revision(name: str) -> str:
+    """Fetch the exact current commit SHA for a HF dataset repo, so we can pin to it.
+
+    Without this, load_dataset() tracks whatever "main" points to at run time, and the
+    same script can silently produce a different dataset later (the audit paper found
+    accuracy swings of 10+ points between MedCalc-Bench dataset revisions).
+    """
+    from huggingface_hub import HfApi
+
+    return HfApi().dataset_info(name).sha
+
+
 def load_first_available_dataset():
-    """Try each dataset name in order, return (name, DatasetDict) for the first that loads."""
+    """Try each dataset name in order, return (name, revision, DatasetDict) for the first that loads."""
     from datasets import load_dataset
 
     last_error = None
     for name in DATASET_CANDIDATES:
         try:
             print(f"Trying to load '{name}' from Hugging Face...")
-            dataset = load_dataset(name)
-            print(f"Loaded '{name}'.")
-            return name, dataset
+            revision = get_dataset_revision(name)
+            dataset = load_dataset(name, revision=revision)
+            print(f"Loaded '{name}' @ revision {revision}.")
+            return name, revision, dataset
         except Exception as exc:  # noqa: BLE001 - we want to try the next candidate on any failure
             print(f"  failed: {exc}")
             last_error = exc
@@ -78,13 +91,17 @@ def main() -> None:
     RAW_DIR.mkdir(parents=True, exist_ok=True)
 
     try:
-        dataset_name, dataset = load_first_available_dataset()
+        dataset_name, revision, dataset = load_first_available_dataset()
     except Exception:
         print(MANUAL_DOWNLOAD_MESSAGE)
         sys.exit(1)
 
-    print(f"\nUsing dataset: {dataset_name}")
+    print(f"\nUsing dataset: {dataset_name} @ {revision}")
     print(f"Available splits: {list(dataset.keys())}")
+
+    version_path = RAW_DIR / "DATASET_VERSION.txt"
+    version_path.write_text(f"{dataset_name}\n{revision}\n", encoding="utf-8")
+    print(f"pinned dataset version -> {version_path}")
 
     for split_name, split_data in dataset.items():
         df = split_data.to_pandas()

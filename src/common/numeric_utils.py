@@ -5,6 +5,7 @@ MedCalc-Bench answers are either:
 - categorical/string (e.g. a risk category name), when lower/upper limit are absent.
 """
 
+import ast
 import re
 from datetime import date, datetime
 from typing import Optional
@@ -69,6 +70,21 @@ def numeric_matches(
     return abs(predicted_value - gt_value) / abs(gt_value) <= relative_tolerance
 
 
+def integer_matches(predicted_answer, ground_truth_answer) -> bool:
+    """True if the predicted value rounds to exactly the ground truth integer.
+
+    Matches the official MedCalc-Bench eval logic (round then ==), which is NOT
+    a tolerance range - unlike "decimal" output_type. lower_limit/upper_limit are
+    ignored here on purpose, even though in practice they're equal to
+    ground_truth_answer for every integer-type row we've seen so far.
+    """
+    predicted_value = extract_number(predicted_answer)
+    gt_value = extract_number(ground_truth_answer)
+    if predicted_value is None or gt_value is None:
+        return False
+    return round(predicted_value) == round(gt_value)
+
+
 def parse_date(text) -> Optional[date]:
     """Parse a date string like '09/11/2014' using MedCalc-Bench's common formats. None if unparseable.
 
@@ -115,6 +131,63 @@ def string_matches(predicted_answer, ground_truth_answer, fuzzy_threshold: float
     return fuzz.ratio(predicted_text, gt_text) >= fuzzy_threshold
 
 
+def parse_relevant_entities(text) -> dict:
+    """Parse MedCalc-Bench's `relevant_entities` column: a Python-dict-literal string like
+    "{'age': [61.0, 'years'], 'Hemoptysis': False}" (note: single-quoted, not JSON)."""
+    if text is None:
+        return {}
+    try:
+        parsed = ast.literal_eval(str(text))
+        return parsed if isinstance(parsed, dict) else {}
+    except (ValueError, SyntaxError):
+        return {}
+
+
+def _normalize_entity_key(key: str) -> str:
+    """'heart_rate' and 'Heart Rate or Pulse' should read as comparable - normalize
+    underscores/hyphens to spaces and lowercase before fuzzy matching, since
+    token_sort_ratio treats 'heart_rate' as a single opaque token otherwise."""
+    key = re.sub(r"[_\-]+", " ", str(key))
+    key = re.sub(r"\s+", " ", key).strip().lower()
+    return key
+
+
+def entity_coverage(extracted_entities, relevant_entities_text, fuzzy_threshold: float = 70.0) -> float:
+    """Fraction of the gold-required entities a model's extracted-entities dict appears to cover.
+
+    Gold entity names ("Heart Rate or Pulse") and model-chosen key names ("heart_rate") use
+    different naming conventions, so this matches by fuzzy key-name similarity (after
+    normalizing case/underscores) rather than exact string equality. This is an approximate
+    auto-scorer, not a substitute for manual review of genuinely ambiguous cases.
+    """
+    gold = parse_relevant_entities(relevant_entities_text)
+    if not gold:
+        return 1.0  # nothing was required, so trivially "covered"
+    if not isinstance(extracted_entities, dict) or not extracted_entities:
+        return 0.0
+
+    extracted_keys = [_normalize_entity_key(k) for k in extracted_entities.keys()]
+    covered = sum(
+        1
+        for gold_key in gold
+        if max(
+            (
+                max(fuzz.token_set_ratio(_normalize_entity_key(gold_key), k), fuzz.partial_ratio(_normalize_entity_key(gold_key), k))
+                for k in extracted_keys
+            ),
+            default=0.0,
+        )
+        >= fuzzy_threshold
+    )
+    return covered / len(gold)
+
+
+def entities_match(extracted_entities, relevant_entities_text, coverage_threshold: float = 0.8) -> bool:
+    """True if entity_coverage() clears coverage_threshold - used to flag an auto 'entity error'
+    (entity_error = NOT entities_match(...)) for methods whose output includes an entities field."""
+    return entity_coverage(extracted_entities, relevant_entities_text) >= coverage_threshold
+
+
 def answer_is_correct(
     predicted_answer,
     ground_truth_answer,
@@ -130,7 +203,9 @@ def answer_is_correct(
     """
     if output_type == "date":
         return date_matches(predicted_answer, ground_truth_answer, lower_limit, upper_limit)
-    if output_type in ("decimal", "integer"):
+    if output_type == "integer":
+        return integer_matches(predicted_answer, ground_truth_answer)
+    if output_type == "decimal":
         return numeric_matches(predicted_answer, ground_truth_answer, lower_limit, upper_limit)
     if output_type is None:
         # output_type not supplied - infer it, checking date first: is_number() would
