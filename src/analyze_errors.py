@@ -43,6 +43,7 @@ def main() -> None:
                 gold.get("ground_truth_answer"),
                 gold.get("lower_limit"),
                 gold.get("upper_limit"),
+                gold.get("output_type"),
             )
             if is_correct:
                 continue

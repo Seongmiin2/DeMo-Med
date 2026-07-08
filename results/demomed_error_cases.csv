@@ -1,6 +1,7 @@
 method,id,calculator_name,predicted_answer,ground_truth_answer,lower_limit,upper_limit,abstain,abstain_reason
 llm_only,621,PERC Rule for Pulmonary Embolism,5,4,4,4,False,
 llm_only,341,MELD Na (UNOS/OPTN),32,18.0,17.1,18.9,False,
+llm_only,981,Estimated Due Date,09/17/2014,09/11/2014,09/11/2014,09/11/2014,False,
 llm_only,61,Mean Arterial Pressure (MAP),106.67,100.0,95.0,105.0,False,
 llm_only,261,HEART Score for Major Cardiac Events,5,4,4,4,False,
 llm_only,941,Sequential Organ Failure Assessment (SOFA) Score,4,6,6,6,False,
@@ -22,6 +23,7 @@ cot,1041,Morphine Milligram Equivalents (MME) Calculator,128,149.0,141.55,156.45
 open_book,621,PERC Rule for Pulmonary Embolism,3,4,4,4,False,
 open_book,341,MELD Na (UNOS/OPTN),16,18.0,17.1,18.9,False,
 open_book,861,Albumin Corrected Delta Ratio,1.75,0.7,0.665,0.735,False,
+open_book,981,Estimated Due Date,09/17/2014,09/11/2014,09/11/2014,09/11/2014,False,
 open_book,261,HEART Score for Major Cardiac Events,6,4,4,4,False,
 open_book,681,QTc Framingham Calculator,457.09090909090907,560.0007,532.00067,588.00074,False,
 open_book,641,SIRS Criteria,2,1,1,1,False,
@@ -29,6 +31,7 @@ open_book,381,Sodium Correction for Hyperglycemia,123.48,108.656,103.2232,114.08
 open_book,661,QTc Fridericia Calculator,292.92,482.05069,457.94816,506.15322,False,
 open_book,1041,Morphine Milligram Equivalents (MME) Calculator,112,149.0,141.55,156.45,False,
 open_book,161,Ideal Body Weight,61.14,55.07095,52.3174,57.8245,False,
+demo_med,981,Estimated Due Date,09/18/2014,09/11/2014,09/11/2014,09/11/2014,False,
 demo_med,941,Sequential Organ Failure Assessment (SOFA) Score,5,6,6,6,False,
 demo_med,681,QTc Framingham Calculator,523.09,560.0007,532.00067,588.00074,False,
 demo_med,641,SIRS Criteria,2,1,1,1,False,

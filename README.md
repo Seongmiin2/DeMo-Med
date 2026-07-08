@@ -14,23 +14,36 @@ python src/eval_demomed.py --gold data/pilot/pilot_20.csv --pred_dir outputs/rea
 
 | Method    | N  | Answer Accuracy | No Numeric Output Rate | Abstain Rate |
 |-----------|---:|-----------------:|------------------------:|-------------:|
-| LLM-only  | 20 | 0.40 | 0.00 | 0.00 |
+| LLM-only  | 20 | 0.35 | 0.00 | 0.00 |
 | CoT       | 20 | 0.60 | 0.00 | 0.00 |
-| Open-book | 20 | 0.50 | 0.00 | 0.00 |
-| DeMo-Med  | 20 | 0.70 | 0.00 | 0.00 |
+| Open-book | 20 | 0.45 | 0.00 | 0.00 |
+| DeMo-Med  | 20 | 0.65 | 0.00 | 0.00 |
 
 Raw predictions: `outputs/real/*.jsonl`. Per-row mismatches: `results/demomed_error_cases.csv`.
 All 80 calls (4 methods x 20 rows) completed without a single API failure.
 
+> **Grading bug fixed after the first pass.** The one `date`-type question in
+> pilot_20 (Estimated Due Date, e.g. ground truth `09/11/2014`) was being
+> graded by `common/numeric_utils.py` as if it were numeric - it extracted just
+> the leading "09" from the date string and compared that, so any prediction
+> starting with the same month/day digits (e.g. `09/17/2014`, `09/18/2014`)
+> was wrongly marked correct regardless of the actual date. Fixed by adding a
+> real `parse_date`/`date_matches` path dispatched on the dataset's own
+> `output_type` column (`decimal` | `integer` | `date`) instead of guessing
+> the answer type from the string. This dropped LLM-only/Open-book/DeMo-Med
+> by 1 correct answer each (the only method that had actually gotten the date
+> right, CoT, was unaffected). The numbers above are post-fix.
+
 **Takeaway from this first pilot_20 run:** DeMo-Med's staged
 (rule injection -> extraction -> verification -> answer) approach scored highest
-(0.70), CoT was a clear second (0.60), and plain LLM-only was worst (0.40) -
+(0.65), CoT was a clear second (0.60), and plain LLM-only was worst (0.35) -
 consistent with the project's hypothesis that decomposition reduces errors.
-Open-book (0.50) underperformed CoT despite having the calculator's formula
+Open-book (0.45) underperformed CoT despite having the calculator's formula
 available, which suggests just handing over a knowledge card isn't enough by
 itself - the extraction/verification structure in DeMo-Med seems to matter as
-much as the reference material. N=20 is too small to draw a firm conclusion;
-see "Next step" for scaling to pilot_100.
+much as the reference material. N=20 is too small to draw a firm conclusion,
+and DeMo-Med/CoT are now only 1 correct answer apart - see "Next step" for
+scaling to pilot_100.
 
 **Recurring error pattern:** QTc Framingham/Fridericia (cube-root and
 multi-step arithmetic) were missed by nearly every method, including DeMo-Med
@@ -60,6 +73,34 @@ slip on a re-generated response), which is reflected in the 0.70 (not 0.75)
 figure above. This is disclosed for transparency, not cherry-picked: this was
 the only re-run performed, and it was done before reading the corrected
 result.
+
+### How "correct" is decided
+
+`src/eval_demomed.py` calls `answer_is_correct()` in
+`src/common/numeric_utils.py`, which dispatches on the dataset's own
+`output_type` column (only 3 values appear in MedCalc-Bench: `decimal` 680
+rows, `integer` 360 rows, `date` 60 rows):
+
+- **`decimal` / `integer`** (e.g. MELD Na, PERC score, MAP): if the gold row
+  has both `lower_limit` and `upper_limit`, the prediction is correct when the
+  first number found in its `answer` field falls inside that inclusive range
+  (MedCalc-Bench's own tolerance band per question, from the benchmark
+  authors - not something this project invented). If limits are missing,
+  falls back to a 5% relative-tolerance check against `ground_truth_answer`.
+- **`date`** (Estimated Due Date): parses both the prediction and the gold
+  value as calendar dates (`%m/%d/%Y`, `%Y-%m-%d`, ...) and requires an exact
+  date match, or falls inside `[lower_limit, upper_limit]` if those are also
+  dates. Added after the grading-bug fix above - see that note for why a
+  plain numeric comparison doesn't work for dates.
+- **Anything else** (calculators with a categorical answer, e.g. a risk
+  category name): case-insensitive exact match, or a fuzzy-string match
+  (`rapidfuzz`, threshold 90/100) to tolerate minor wording differences.
+- **`abstain: true`** is always scored as incorrect, regardless of what's in
+  `answer` - DeMo-Med is the only method that can abstain.
+
+`no_numeric_output_rate` only applies to `decimal`/`integer` questions: it's
+the fraction of predictions where no number could be extracted from `answer`
+at all (e.g. the model wrote a sentence instead of a value).
 
 ## Setup
 

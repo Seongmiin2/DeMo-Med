@@ -42,11 +42,12 @@ def evaluate_method(method: str, pred_dir: Path, gold_by_id: dict) -> dict:
             abstained += 1
 
         gt_answer = gold.get("ground_truth_answer")
-        if is_number(gt_answer) and not is_number(pred.get("answer")):
+        output_type = gold.get("output_type")
+        if output_type in ("decimal", "integer") and not is_number(pred.get("answer")):
             no_numeric_output += 1
 
         if not pred.get("abstain") and answer_is_correct(
-            pred.get("answer"), gt_answer, gold.get("lower_limit"), gold.get("upper_limit")
+            pred.get("answer"), gt_answer, gold.get("lower_limit"), gold.get("upper_limit"), output_type
         ):
             correct += 1
 
