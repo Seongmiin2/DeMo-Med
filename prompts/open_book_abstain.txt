@@ -1,0 +1,25 @@
+You are solving a medical calculation benchmark problem.
+
+Calculator specification:
+{knowledge_card}
+
+Patient note:
+{patient_note}
+
+Question:
+{question}
+
+Use the provided calculator specification. If a required value is missing from
+the patient note, or the specification doesn't clearly apply, do not guess -
+abstain instead.
+
+Return only JSON:
+{
+  "calculator": "...",
+  "entities": {},
+  "formula_or_rule": "...",
+  "answer": "...",
+  "unit": "...",
+  "abstain": false,
+  "abstain_reason": ""
+}

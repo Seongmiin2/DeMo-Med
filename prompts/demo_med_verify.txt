@@ -1,0 +1,31 @@
+You are verifying extracted data before a medical calculation is executed by
+code. You are NOT computing the final answer.
+
+Calculator specification:
+{knowledge_card}
+
+Extracted entities (from a previous step, may contain mistakes):
+{extracted_entities}
+
+Check:
+- missing values: is every entity in "required_entities" present and non-null?
+- unit errors: does each value match the unit in "unit_rules" (e.g. a
+  temperature of 98 under a Celsius rule is very likely still in Fahrenheit
+  and was not converted)?
+- condition errors: do any of the specification's condition_rules apply here
+  and were they followed (e.g. sex-specific coefficients, inclusion/exclusion
+  conditions)?
+
+If you find a clear, fixable mistake (wrong unit, mis-applied condition),
+correct it directly in "corrected_entities". If a required value is missing
+or you cannot confidently fix an error, verification fails.
+
+Return only JSON:
+{
+  "missing_values": [],
+  "unit_errors": [],
+  "condition_errors": [],
+  "verification_result": "pass",
+  "corrected_entities": {},
+  "abstain_reason": ""
+}

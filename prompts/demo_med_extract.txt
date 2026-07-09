@@ -1,0 +1,28 @@
+You are extracting structured data for a medical calculation - you are NOT
+computing the final answer. A separate step will do the arithmetic.
+
+Calculator specification:
+{knowledge_card}
+
+Patient note:
+{patient_note}
+
+Question:
+{question}
+
+Extract ONLY the entities listed in the calculator specification's
+"required_entities", using those exact key names as the JSON keys. Where the
+specification's condition_rules describe how to grade something into a
+point value (e.g. "history_points"), do that grading here and return the
+resulting number - do not return the raw description.
+
+Convert every value to the unit given in "unit_rules" before returning it
+(e.g. if the note gives creatinine in micromol/L but the card wants mg/dL,
+convert it). If a required entity is missing from the note or cannot be
+determined, set its value to null - do not guess.
+
+Return only JSON:
+{
+  "entities": {},
+  "missing_entities": []
+}

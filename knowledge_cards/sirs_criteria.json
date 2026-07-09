@@ -2,8 +2,8 @@
   "calculator_name": "SIRS Criteria",
   "task_type": "rule-based",
   "formula_or_rule": "Count how many of the 4 SIRS criteria are met: temperature > 38C or < 36C; heart rate > 90 bpm; respiratory rate > 20/min OR PaCO2 < 32 mmHg; WBC > 12,000/uL OR < 4,000/uL OR > 10% immature bands. Score = number of criteria met (0-4). SIRS is considered present if score >= 2.",
-  "required_entities": ["temperature_c", "heart_rate", "respiratory_rate", "paco2_mmhg", "wbc_count", "band_percent"],
-  "unit_rules": {"temperature": "C", "heart_rate": "bpm", "respiratory_rate": "breaths/min", "paco2": "mmHg", "wbc_count": "/uL"},
+  "required_entities": ["temperature_c", "heart_rate_bpm", "respiratory_rate", "paco2_mmhg", "wbc_count", "band_percent"],
+  "unit_rules": {"temperature": "C", "heart_rate_bpm": "bpm", "respiratory_rate": "breaths/min", "paco2": "mmHg", "wbc_count": "/uL"},
   "condition_rules": {
     "temperature": "> 38 or < 36 counts as 1 point",
     "respiratory": "RR > 20 OR PaCO2 < 32 counts as 1 point (not both)",
