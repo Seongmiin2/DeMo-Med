@@ -1,5 +1,11 @@
 # DeMo-Med
 
+> **저장소 상태: 파일럿 완료 (2026-07), 후속은 FAVE-Med로 통합**
+>
+> pilot_20 실험은 완료되었으며 아래 수치가 정본입니다.
+> 설계된 pilot_100 / 6조건 / 2모델 확장은 **미실행**입니다.
+> 통합 프레임워크는 [FAVE-Med](https://github.com/Seongmiin2/FAVE-Med)를 참조하십시오.
+
 Research pilot comparing **LLM-only / CoT / Open-book / DeMo-Med** prompting strategies
 on medical calculation problems, to see how much decomposing the solving process into
 stages (clinical rule injection -> value extraction -> verification -> answering)
@@ -18,6 +24,10 @@ python src/eval_demomed.py --gold data/pilot/pilot_20.csv --pred_dir outputs/rea
 | CoT       | 20 | 0.60 | 0.00 | 0.00 |
 | Open-book | 20 | 0.45 | 0.00 | 0.00 |
 | DeMo-Med  | 20 | 0.65 | 0.00 | 0.00 |
+
+> 이 표는 **채점 버그 수정 후** 수치입니다. 수정으로 세 방법이 각 1문항씩
+> 하락했으며, 불리한 방향의 정정을 그대로 반영했습니다.
+> 상세는 아래 "Grading bug fixed after the first pass" 참조.
 
 Raw predictions: `outputs/real/*.jsonl`. Per-row mismatches: `results/demomed_error_cases.csv`.
 All 80 calls (4 methods x 20 rows) completed without a single API failure.
@@ -53,6 +63,26 @@ consistent. This is a concrete example of a limitation worth calling out: the
 verification stage catches missing values/unit/condition mistakes better than
 it catches silent arithmetic slips.
 
+### 이 발견이 이끈 설계 변경
+
+QTc 사례가 보여준 것은 명확하다.
+
+> 모델이 `arithmetic_check: pass`라고 말하는 것은 실제 산술을 실행했다는
+> 뜻이 아니라, 자기 답이 일관적이라고 **주장**한 것이다.
+> 단계 분해는 값 누락·단위 오류·조건 불충족은 잡지만,
+> 조용한 산술 오류는 잡지 못한다.
+
+따라서 후속 연구에서는 검증 단계를 강화하는 대신
+**계산 주체 자체를 바꾸는** 방향을 택했다.
+
+```
+DeMo-Med:   LLM이 추출하고 LLM이 계산하고 LLM이 검증
+FAVE-Med:   LLM은 추출·판정만, 계산은 결정론적 Python executor
+```
+
+이 설계 변경은 [FAVE-Med](https://github.com/Seongmiin2/FAVE-Med)에
+exact-ID executor 10종으로 구현되어 있다.
+
 ### A methodology note on the QTc knowledge cards
 
 While reviewing `results/demomed_error_cases.csv`, both QTc calculators were
@@ -69,7 +99,7 @@ for those 2 rows (ids 661, 681) before finalizing the table above -
 `llm_only`/`cot` never see a knowledge card, so nothing to fix for them.
 The re-run did **not** fix Fridericia for any method, and even flipped
 DeMo-Med's previously-correct Framingham answer to a wrong one (arithmetic
-slip on a re-generated response), which is reflected in the 0.70 (not 0.75)
+slip on a re-generated response), which is reflected in the 0.65
 figure above. This is disclosed for transparency, not cherry-picked: this was
 the only re-run performed, and it was done before reading the corrected
 result.
@@ -134,6 +164,18 @@ OPENAI_API_KEY=sk-...
 ```
 
 ## Pipeline
+
+### 실행 상태
+
+| 항목 | 상태 |
+|---|---|
+| pilot_20 × 4조건 (80 calls) | **실행 완료** |
+| 채점 버그 수정 후 재평가 | **실행 완료** |
+| QTc 카드 수정 후 부분 재실행 (2행) | **실행 완료** |
+| pilot_100 | 미실행 |
+| 6조건 (Open-book+abstain, DeMo-single/multi 등) | 코드 존재, 미실행 |
+| 2모델 비교 (OpenAI / Together) | 미실행 |
+| 임상 검토 | 미실행 |
 
 ```bash
 python src/load_data.py
